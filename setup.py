@@ -7,6 +7,6 @@ setup(
     url='',
     license='',
     author='Serkhanus',
-    author_email='',
-    description=''
+    author_email='serkhanus@hotmail.com',
+    description='Telegram Bot Template'
 )

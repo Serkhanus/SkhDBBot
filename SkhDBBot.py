@@ -1,4 +1,5 @@
 import asyncio
+import configparser
 import logging
 
 import telepot
@@ -7,16 +8,16 @@ import telepot.aio
 """
 $ python3.5 SkhDBBot.py <token>
 
-Integration between Telegram Bot and neo4J DB access quesries.
+ITelegram Bot Template for commands or message processing.
 
 Remember to `/setinline` and `/setinlinefeedback` to enable inline mode for your bot.
 
 It works like this:
-- All strings passed to skh pacjage for parsing and processing. responses sent back to user chat
-- Initial communication starts with session authorization. Token to be provided as a command
+- All strings passed to skh package for parsing and processing. responses sent back to user chat
+- [TODO] Initial communication starts with session authorization. Token to be provided as a command
 - Special mode is accessed by sending '!' simbol as the first symbol in command
 - Command mode is closed by sending '#' simbol as the last simbol in line
-- for multi line commands bot sends chat messages with the corresponding prefix:
+- [TODO] for multi line commands bot sends chat messages with the corresponding prefix:
     - 'LangDB'
     - 'Config'
     - 'Learn'
@@ -31,7 +32,6 @@ class SkhDBBot:
 
     def __init__(self):
         command_mode='Normal'
-        #logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
 
     async def on_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
@@ -39,7 +39,6 @@ class SkhDBBot:
 
         if content_type != 'text':
             return
-        command = msg['text'][0]
         if self.command_Status=='Command' and msg['text'][0] == '!':
             logging.debug('Chat: ' + str(chat_id) + ' !!!! Already in Command Mode !!!!')
             await bot.sendMessage(chat_id, 'Already in Command Mode - Input rejected')
@@ -127,7 +126,7 @@ class SkhDBBot:
         return 'Respond to message: '+msg
 
 
-import configparser
+
 Config = configparser.ConfigParser()
 Config.read("config.ini")
 logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', level=logging._nameToLevel[Config.get('DEFAULT', 'LoggerLevel')], datefmt='%m/%d/%Y %I:%M:%S %p')
