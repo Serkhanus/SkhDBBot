@@ -1,0 +1,5 @@
+[DEFAULT]
+# Logger level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+LoggerLevel = DEBUG
+#Id of Telegram BOT registered with @BotFather
+BotId = xxxxxxxxx:XXX_xXXXXxX-XXXXXXX-X-XXXXXXxXxXXXX
