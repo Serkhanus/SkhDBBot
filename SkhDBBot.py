@@ -31,7 +31,7 @@ class SkhDBBot:
 
     def __init__(self):
         command_mode='Normal'
-        logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
+        #logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
 
     async def on_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
@@ -126,11 +126,13 @@ class SkhDBBot:
             return "***"
         return 'Respond to message: '+msg
 
-#TOKEN = sys.argv[1]  # get token from command-line
 
-
-TOKEN = "xxx"
-
+import configparser
+Config = configparser.ConfigParser()
+Config.read("config.ini")
+logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', level=logging._nameToLevel[Config.get('DEFAULT', 'LoggerLevel')], datefmt='%m/%d/%Y %I:%M:%S %p')
+TOKEN=Config.get('DEFAULT', 'BotId')
+logging.debug(TOKEN)
 bot = telepot.aio.Bot(TOKEN)
 answerer = telepot.aio.helper.Answerer(bot)
 skh_bot=SkhDBBot()
