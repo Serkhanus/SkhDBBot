@@ -5,10 +5,14 @@ import logging
 import telepot
 import telepot.aio
 
+from commandParser import CommandParser
+from messageParser import MessageParser
+
+# import messageParser
 """
 $ python3.5 SkhDBBot.py <token>
 
-ITelegram Bot Template for commands or message processing.
+Telegram Bot Template for commands or message processing.
 
 Remember to `/setinline` and `/setinlinefeedback` to enable inline mode for your bot.
 
@@ -23,78 +27,80 @@ It works like this:
     - 'Learn'
 
 """
+
+
 class SkhDBBot:
     modes = [{"Normal": 0}, {"LangDB": 1}, {"Config": 2}, {"Learn": 3}]
     message_with_inline_keyboard = None
     command_Status = None
     command_cont = []
     command_mode = 'Normal'
+    mParser = MessageParser()
+    cParser = CommandParser()
 
     def __init__(self):
-        command_mode='Normal'
+        command_mode = 'Normal'
+
 
     async def on_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg)
-        logging.info('Chat:' + content_type + ' '+ chat_type+ ' ' + str(chat_id))
+        logging.info('Chat:' + content_type + ' ' + chat_type + ' ' + str(chat_id))
 
         if content_type != 'text':
             return
-        if self.command_Status=='Command' and msg['text'][0] == '!':
+        respond = await self.chatProcessor(chat_id, msg)
+        await bot.sendMessage(chat_id, respond)
+
+    async def chatProcessor(self, chat_id, msg):
+        respond = '*Empty*'
+        if self.command_Status == 'Command' and msg['text'][0] == '!':
             logging.debug('Chat: ' + str(chat_id) + ' !!!! Already in Command Mode !!!!')
-            await bot.sendMessage(chat_id, 'Already in Command Mode - Input rejected')
-        elif msg['text'][0] == '!' and msg['text'][-1] == '#' and self.command_Status==None:
-            if len(msg['text'])>2:
+            respond = 'Already in Command Mode - Input rejected'
+        elif msg['text'][0] == '!' and msg['text'][-1] == '#' and self.command_Status == None:
+            if len(msg['text']) > 2:
                 respond = self.parseCommand(msg['text'][1:-1])
-                logging.debug('Chat: '+ str(chat_id)+ ' message is: '+ msg['text'])
+                logging.debug('Chat: ' + str(chat_id) + ' message is: ' + msg['text'])
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Received ****')
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
-                await bot.sendMessage(chat_id, respond)
-                self.command_Status=None
+                self.command_Status = None
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Executed ****')
             else:
                 logging.debug('Chat: ' + str(chat_id) + ' !!!! No command received - nothing done !!!!')
-                await bot.sendMessage(chat_id, 'No command received - nothing done')
-        elif msg['text'][0] == '!' and self.command_Status==None:
-            respond='*'
-            if len(msg['text'])>1:
+                respond = 'No command received - nothing done'
+        elif msg['text'][0] == '!' and self.command_Status == None:
+            if len(msg['text']) > 1:
                 respond = self.parseCommand(msg['text'][1:])
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Received ****')
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
-            await bot.sendMessage(chat_id, respond)
-            self.command_Status='Command'
+            self.command_Status = 'Command'
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Status : ' + self.command_Status)
-            await bot.sendMessage(chat_id, 'Command started')
+            logging.debug('Chat: ' + str(chat_id) + ' **** Command started')
         elif self.command_Status == 'Command' and msg['text'][-1:] == '#':
-            respond='*'
-            if len(msg['text'])>1:
+            if len(msg['text']) > 1:
                 respond = self.parseCommand(msg['text'][0:-1])
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Received ****')
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Status : ' + self.command_Status)
-            self.command_Status=None
-            await bot.sendMessage(chat_id, respond)
+            self.command_Status = None
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Executed ****')
         elif self.command_Status == 'Command':
             respond = self.parseCommand(msg['text'])
             await bot.sendMessage(chat_id, 'Command input in progress')
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Status : ' + self.command_Status)
-            await bot.sendMessage(chat_id, respond)
         elif msg['text'][-1:] == '#':
             logging.debug('Chat: ' + str(chat_id) + ' !!!! Command not started - input rejected !!!!')
-            await bot.sendMessage(chat_id, 'Command not started - input rejected')
+            respond = 'Command not started - input rejected'
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
         else:
             respond = self.parseMessage(msg['text'])
             logging.debug('Chat: ' + str(chat_id) + ' **** Message Received ****')
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
-            await bot.sendMessage(chat_id, respond)
-
+        return respond
 
     def on_edited_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg, flavor='edited_chat')
         print('Edited chat:', content_type, chat_type, chat_id)
-
 
     async def on_callback_query(self, msg):
         query_id, from_id, data = telepot.glance(msg, flavor='callback_query')
@@ -116,25 +122,23 @@ class SkhDBBot:
     def parseCommand(self, msg):
         if msg == None:
             return "***"
-        return 'Respond to Command: '+msg
-
-
+        return self.cParser.commandProcessor(msg)
 
     def parseMessage(self, msg):
         if msg == None:
             return "***"
-        return 'Respond to message: '+msg
-
+        return self.mParser.messageProcessor(msg)
 
 
 Config = configparser.ConfigParser()
 Config.read("config.ini")
-logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', level=logging._nameToLevel[Config.get('DEFAULT', 'LoggerLevel')], datefmt='%m/%d/%Y %I:%M:%S %p')
-TOKEN=Config.get('DEFAULT', 'BotId')
+logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
+                    level=logging._nameToLevel[Config.get('DEFAULT', 'LoggerLevel')], datefmt='%m/%d/%Y %I:%M:%S %p')
+TOKEN = Config.get('DEFAULT', 'BotId')
 logging.debug(TOKEN)
 bot = telepot.aio.Bot(TOKEN)
 answerer = telepot.aio.helper.Answerer(bot)
-skh_bot=SkhDBBot()
+skh_bot = SkhDBBot()
 loop = asyncio.get_event_loop()
 loop.create_task(bot.message_loop({'chat': skh_bot.on_chat_message,
                                    'edited_chat': skh_bot.on_edited_chat_message,
