@@ -1,7 +1,6 @@
 import asyncio
 import configparser
 import logging
-
 import telepot
 import telepot.aio
 
@@ -81,6 +80,7 @@ class SkhDBBot:
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Received ****')
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
                 logging.debug('Chat: ' + str(chat_id) + ' **** Command Status : ' + self.command_Status)
+
             self.command_Status = None
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Executed ****')
         elif self.command_Status == 'Command':
@@ -98,6 +98,7 @@ class SkhDBBot:
             logging.debug('Chat: ' + str(chat_id) + ' **** Command Mode: ' + self.command_mode)
         return respond
 
+    # comment
     def on_edited_chat_message(self, msg):
         content_type, chat_type, chat_id = telepot.glance(msg, flavor='edited_chat')
         print('Edited chat:', content_type, chat_type, chat_id)
@@ -122,7 +123,7 @@ class SkhDBBot:
     def parseCommand(self, msg):
         if msg == None:
             return "***"
-        return self.cParser.commandProcessor(msg)
+        return self.cParser.commandProcessor(msg)['message']
 
     def parseMessage(self, msg):
         if msg == None:

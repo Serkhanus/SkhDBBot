@@ -20,4 +20,7 @@ class MessageParser:
         logging.debug(self.responds['Hi'])
 
     def messageProcessor(self, request):
-        return 'You told ' + request
+        try:
+            return self.responds[request]
+        except KeyError:
+            return 'I do not know what to answer'
