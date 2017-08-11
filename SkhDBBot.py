@@ -132,7 +132,7 @@ class SkhDBBot:
 
 
 Config = configparser.ConfigParser()
-Config.read("config.ini")
+Config.read("./config/config.ini")
 logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s',
                     level=logging._nameToLevel[Config.get('DEFAULT', 'LoggerLevel')], datefmt='%m/%d/%Y %I:%M:%S %p')
 TOKEN = Config.get('DEFAULT', 'BotId')
